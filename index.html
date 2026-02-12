@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine's Quiz ❤️</title>
+    <style>
+        body {
+            /* CAMBIA EL FONDO AQUÍ: Puedes usar un color o una URL de imagen */
+            background: pink url('https://www.transparenttextures.com/patterns/heart.png'); 
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        #game-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            z-index: 10;
+        }
+
+        button {
+            background-color: #ff4d6d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s;
+        }
+
+        button:hover { transform: scale(1.1); }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="game-container">
+        <div id="quiz-section">
+            <h2 id="question-text">¿Preparada/o para tu regalo?</h2>
+            <div id="options">
+                <button onclick="startQuiz()">¡Empezar!</button>
+            </div>
+        </div>
+
+        <div id="final-message" class="hidden">
+            <h1 id="title-final">¡Felicidades! ❤️</h1>
+            <p id="p-final">Has ganado un cupón por una cena romántica y muchos besos.</p>
+            <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp6emZ6emZ6emZ6emZ6emZ6emZ6emZ6emZ6emZ6emZ6emZ6emZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZContext&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=g" width="100%">
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "¿Cuál fue nuestra primera cita?", a: ["Cine", "Parque", "Café"], correct: 1 },
+            { q: "¿Qué comida prefiero?", a: ["Pizza", "Sushi", "Tacos"], correct: 0 },
+            { q: "¿Me quieres mucho?", a: ["Sí", "Obvio", "Muchísimo"], correct: 2 }
+        ];
+
+        let currentQuestion = 0;
+        const music = document.getElementById("bgMusic");
+
+        function startQuiz() {
+            music.play(); // La música empieza al interactuar
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById("question-text").innerText = q.q;
+            const optionsDiv = document.getElementById("options");
+            optionsDiv.innerHTML = "";
+            
+            q.a.forEach((opt, index) => {
+                const btn = document.createElement("button");
+                btn.innerText = opt;
+                btn.onclick = () => checkAnswer(index);
+                optionsDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(index) {
+            if (index === questions[currentQuestion].correct) {
+                currentQuestion++;
+                if (currentQuestion < questions.length) {
+                    showQuestion();
+                } else {
+                    document.getElementById("quiz-section").classList.add("hidden");
+                    document.getElementById("final-message").classList.remove("hidden");
+                }
+            } else {
+                alert("¡Nop! Inténtalo de nuevo 😝");
+            }
+        }
+    </script>
+</body>
+</html>
