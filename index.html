@@ -3,80 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valentine's Quiz ❤️</title>
+    <title>Valentine's Day ❤️</title>
     <style>
-        body {
-            /* CAMBIA EL FONDO AQUÍ: Puedes usar un color o una URL de imagen */
-            background: pink url('https://www.transparenttextures.com/patterns/heart.png'); 
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* Contenedor del video */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Lo manda al fondo */
+            pointer-events: none;
             overflow: hidden;
         }
 
+        /* Hace que el video de YT cubra toda la pantalla */
+        .video-background iframe {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100vw;
+            height: 100vh;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Ajuste para pantallas anchas (PC) */
+        @media (min-aspect-ratio: 16/9) {
+            .video-background iframe { height: 56.25vw; }
+        }
+        /* Ajuste para pantallas altas (Móvil) */
+        @media (max-aspect-ratio: 16/9) {
+            .video-background iframe { width: 177.78vh; }
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
         #game-container {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 30px;
+            background: rgba(255, 255, 255, 0.2); /* Transparencia tipo cristal */
+            backdrop-filter: blur(10px); /* Desenfoque del video por detrás */
+            -webkit-backdrop-filter: blur(10px);
+            padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             text-align: center;
-            max-width: 400px;
+            color: white;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            max-width: 450px;
             width: 90%;
-            z-index: 10;
         }
 
         button {
-            background-color: #ff4d6d;
+            background: #ff4d6d;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 25px;
             margin: 10px;
-            border-radius: 10px;
+            border-radius: 50px;
             cursor: pointer;
-            font-size: 16px;
-            transition: transform 0.2s;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
         }
 
-        button:hover { transform: scale(1.1); }
+        button:hover {
+            transform: scale(1.1);
+            background: #ff758f;
+        }
+
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
+    <div class="video-background">
+        <iframe 
+            src="https://www.youtube.com/embed/TU_ID_AQUÍ?autoplay=1&mute=1&controls=0&loop=1&playlist=TU_ID_AQUÍ&rel=0&showinfo=0" 
+            frameborder="0" 
+            allow="autoplay; encrypted-media">
+        </iframe>
+    </div>
+
     <audio id="bgMusic" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
     </audio>
 
     <div id="game-container">
         <div id="quiz-section">
-            <h2 id="question-text">¿Preparada/o para tu regalo?</h2>
-            <div id="options">
-                <button onclick="startQuiz()">¡Empezar!</button>
+            <h1 style="margin-bottom: 20px;">❤️ Valentine's Quiz ❤️</h1>
+            <p id="question-text">¿Estás lista/o para esto?</p>
+            <div id="options" style="margin-top: 20px;">
+                <button onclick="startQuiz()">¡Sí, vamos!</button>
             </div>
         </div>
 
         <div id="final-message" class="hidden">
-            <h1 id="title-final">¡Felicidades! ❤️</h1>
-            <p id="p-final">Has ganado un cupón por una cena romántica y muchos besos.</p>
-            <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHp6emZ6emZ6emZ6emZ6emZ6emZ6emZ6emZ6emZ6emZ6emZ6emZ6JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZContext&ep=v1_internal_gif_by_id&rid=giphy.gif&ct=g" width="100%">
+            <h1>¡Lo lograste! ❤️</h1>
+            <p style="font-size: 1.2rem; margin: 15px 0;">Eres la mejor persona del mundo.</p>
+            <p>¡Te quiero muchísimo!</p>
         </div>
     </div>
 
     <script>
+        // Tus preguntas aquí
         const questions = [
-            { q: "¿Cuál fue nuestra primera cita?", a: ["Cine", "Parque", "Café"], correct: 1 },
-            { q: "¿Qué comida prefiero?", a: ["Pizza", "Sushi", "Tacos"], correct: 0 },
-            { q: "¿Me quieres mucho?", a: ["Sí", "Obvio", "Muchísimo"], correct: 2 }
+            { q: "¿Cuál es nuestro lugar favorito?", a: ["El parque", "Tu casa", "El cine"], correct: 1 },
+            { q: "¿Cuánto te quiero?", a: ["Mucho", "Poquito", "Del 1 al 10, un 100"], correct: 2 }
         ];
 
         let currentQuestion = 0;
         const music = document.getElementById("bgMusic");
 
         function startQuiz() {
-            music.play(); // La música empieza al interactuar
+            music.play();
             showQuestion();
         }
 
@@ -104,7 +150,7 @@
                     document.getElementById("final-message").classList.remove("hidden");
                 }
             } else {
-                alert("¡Nop! Inténtalo de nuevo 😝");
+                alert("¡Nop! Intenta otra vez 🥺");
             }
         }
     </script>
