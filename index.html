@@ -4,40 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Valentine Game ❤️</title>
+    <link href="https://fonts.googleapis.com/css2?family=Love+Ya+Like+A+Sister&display=swap" rel="stylesheet">
     <style>
-        /* Evita que el celular haga scroll o zoom por error */
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; }
-        body { overflow: hidden; font-family: 'Arial', sans-serif; background: #000; position: fixed; width: 100%; height: 100%; }
-
-        /* Video de fondo (ajustado para vertical) */
-        .video-bg {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; pointer-events: none;
-        }
-        .video-bg iframe {
-            width: 300vh; height: 100vh; margin-left: -100vh; /* Centra el video en pantallas verticales */
+        body { 
+            overflow: hidden; 
+            font-family: 'Love Ya Like A Sister', cursive; /* FUENTE DEL JUEGO */
+            background: #000; 
+            position: fixed; width: 100%; height: 100%; 
         }
 
-        /* UI de Puntos */
+        .video-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+        .video-bg iframe { width: 300vh; height: 100vh; margin-left: -100vh; }
+
         #ui {
             position: absolute; top: 40px; width: 100%; text-align: center;
-            color: white; font-size: 30px; font-weight: bold;
+            color: white; font-size: 28px; font-weight: bold;
             text-shadow: 2px 2px 10px rgba(0,0,0,0.8); z-index: 10;
         }
 
+        #level-indicator { color: #ff4d6d; display: block; font-size: 20px; }
+
         canvas { display: block; }
 
-        /* Pantalla de Inicio / Ganador */
         #overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
             display: flex; flex-direction: column; justify-content: center;
             align-items: center; z-index: 20; color: white; padding: 20px; text-align: center;
         }
 
+        #prize-photo {
+            width: 200px; height: 200px; border-radius: 20px;
+            border: 4px solid #ff4d6d; object-fit: cover;
+            margin: 20px 0; display: none;
+            box-shadow: 0 0 20px #ff4d6d;
+        }
+
         button {
-            padding: 20px 40px; font-size: 22px; background: #ff4d6d;
+            padding: 15px 35px; font-size: 24px; background: #ff4d6d;
             color: white; border: none; border-radius: 50px;
-            margin-top: 20px; box-shadow: 0 5px 15px rgba(255, 77, 109, 0.4);
+            margin-top: 20px; font-family: 'Love Ya Like A Sister', cursive;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -47,13 +54,17 @@
         <iframe src="https://www.youtube.com/embed/TU_ID_AQUÍ?autoplay=1&mute=1&controls=0&loop=1&playlist=TU_ID_AQUÍ" frameborder="0"></iframe>
     </div>
 
-    <audio id="musica" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"></audio>
+    <audio id="audioPlayer" loop></audio>
 
-    <div id="ui">Corazones: <span id="score">0</span></div>
+    <div id="ui">
+        <span id="level-indicator">NIVEL 1: GATITOS</span>
+        Puntos: <span id="score">0</span> / 30
+    </div>
 
     <div id="overlay">
-        <h1 id="msg-h1">¿Atrapas mi amor? ❤️</h1>
-        <p id="msg-p">Desliza tu dedo para mover la canasta</p>
+        <h1 id="msg-h1" style="font-size: 40px;">¿Atrapas mi amor? ❤️</h1>
+        <p id="msg-p" style="font-size: 20px;">Nivel 1: Atrapa los gatitos</p>
+        <img id="prize-photo" src="nuestra_foto.jpg" alt="Regalo">
         <button id="start-btn" onclick="startGame()">¡EMPEZAR!</button>
     </div>
 
@@ -63,90 +74,128 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreElement = document.getElementById('score');
+        const levelElement = document.getElementById('level-indicator');
+        const prizePhoto = document.getElementById('prize-photo');
+        const audio = document.getElementById('audioPlayer');
         
+        // --- CONFIGURACIÓN DE MÚSICA (CAMBIA LOS LINKS AQUÍ) ---
+        const musicas = {
+            1: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+            2: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+            3: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+            victoria: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
+        };
+
+        // --- CONFIGURACIÓN DE NIVELES ---
+        const configNiveles = {
+            1: { speed: 3, rate: 1000, emoji: ['🐱', '🐈', '🐾'], name: "NIVEL 1: MODO GATITOS" },
+            2: { speed: 6, rate: 700, emoji: ['🐱', '😸', '🐈‍⬛'], name: "NIVEL 2: GATITOS VELOCES" },
+            3: { speed: 10, rate: 450, emoji: ['❤️', '💖', '💝', '✨'], name: "NIVEL 3: LLUVIA DE AMOR" }
+        };
+
         let score = 0;
+        let level = 1;
         let gameRunning = false;
         let hearts = [];
-        // Catcher adaptado a pulgares de celular
-        const catcher = { x: 0, y: 0, size: 70, emoji: '🧺' };
+        let heartInterval;
+        
+        // --- MODIFICA LA CANASTA AQUÍ ---
+        const catcher = { x: 0, y: 0, size: 80, emoji: '🧺' };
 
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            catcher.y = canvas.height - 120; // Un poco más arriba del borde inferior
+            catcher.y = canvas.height - 120;
             catcher.x = canvas.width / 2 - catcher.size / 2;
         }
 
         window.addEventListener('resize', resize);
         resize();
 
-        // CONTROL TÁCTIL (Touch)
         window.addEventListener('touchmove', (e) => {
-            let touchX = e.touches[0].clientX;
-            catcher.x = touchX - catcher.size / 2;
-            
-            // Límites para que no se salga de la pantalla
-            if (catcher.x < 0) catcher.x = 0;
-            if (catcher.x > canvas.width - catcher.size) catcher.x = canvas.width - catcher.size;
+            if(!gameRunning) return;
+            catcher.x = e.touches[0].clientX - catcher.size / 2;
         });
 
+        function playMusic(track) {
+            audio.src = track;
+            audio.play().catch(e => console.log("Esperando interacción..."));
+        }
+
         function createHeart() {
-            if(gameRunning) {
-                hearts.push({
-                    x: Math.random() * (canvas.width - 40),
-                    y: -50,
-                    speed: 3 + Math.random() * 4,
-                    emoji: ['❤️', '💖', '💝', '✨'][Math.floor(Math.random()*4)],
-                    size: 40
-                });
-            }
+            if(!gameRunning) return;
+            const config = configNiveles[level];
+            hearts.push({
+                x: Math.random() * (canvas.width - 40),
+                y: -50,
+                speed: config.speed + Math.random() * 2,
+                emoji: config.emoji[Math.floor(Math.random() * config.emoji.length)],
+                size: 45
+            });
         }
 
         function startGame() {
             document.getElementById('overlay').style.display = 'none';
-            document.getElementById('musica').play();
-            score = 0;
-            hearts = [];
-            scoreElement.innerText = score;
+            prizePhoto.style.display = 'none';
+            
+            if (level === 1 && score === 0) { 
+                animate(); 
+                playMusic(musicas[1]);
+            } else if (level <= 3) {
+                playMusic(musicas[level]);
+            }
+
             gameRunning = true;
-            animate();
-            setInterval(createHeart, 700);
+            clearInterval(heartInterval);
+            heartInterval = setInterval(createHeart, configNiveles[level].rate);
+        }
+
+        function nextLevel() {
+            gameRunning = false;
+            clearInterval(heartInterval);
+            level++;
+            document.getElementById('overlay').style.display = 'flex';
+            levelElement.innerText = configNiveles[level].name;
+            document.getElementById('msg-h1').innerText = "¡Siguiente Nivel! 🐾";
+            document.getElementById('msg-p').innerText = "Prepárate para el " + configNiveles[level].name;
+            document.getElementById('start-btn').innerText = "CONTINUAR";
         }
 
         function winGame() {
             gameRunning = false;
+            clearInterval(heartInterval);
+            playMusic(musicas.victoria); // Música especial de ganar
+            
             document.getElementById('overlay').style.display = 'flex';
-            document.getElementById('msg-h1').innerText = "¡ERES INCREÍBLE! ❤️";
-            document.getElementById('msg-p').innerText = "Has atrapado todo mi amor. ¿Quieres jugar de nuevo?";
-            document.getElementById('start-btn').innerText = "VOLVER A JUGAR";
+            document.getElementById('msg-h1').innerText = "¡LO LOGRASTE! ❤️";
+            document.getElementById('msg-p').innerText = "Has superado todos los niveles. Te amo infinitamente.";
+            prizePhoto.style.display = 'block'; 
+            document.getElementById('start-btn').innerText = "JUGAR DE NUEVO";
+            level = 1;
+            score = 0;
         }
 
         function animate() {
-            if(!gameRunning) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Dibujar Catcher
             ctx.font = catcher.size + 'px Arial';
             ctx.fillText(catcher.emoji, catcher.x, catcher.y + catcher.size);
 
             for(let i = hearts.length - 1; i >= 0; i--) {
                 const h = hearts[i];
-                h.y += h.speed;
+                if(gameRunning) h.y += h.speed;
                 ctx.font = h.size + 'px Arial';
                 ctx.fillText(h.emoji, h.x, h.y);
 
-                // Colisión optimizada para dedos
                 if(h.y > catcher.y && h.y < catcher.y + catcher.size &&
-                   h.x > catcher.x - 20 && h.x < catcher.x + catcher.size + 20) {
+                   h.x > catcher.x - 30 && h.x < catcher.x + catcher.size + 30) {
                     hearts.splice(i, 1);
                     score++;
                     scoreElement.innerText = score;
                     
-                    if(score >= 15) {
-                        winGame();
-                    }
+                    if(score === 10 && level === 1) nextLevel();
+                    else if(score === 20 && level === 2) nextLevel();
+                    else if(score === 30 && level === 3) winGame();
                 }
-
                 if(h.y > canvas.height) hearts.splice(i, 1);
             }
             requestAnimationFrame(animate);
