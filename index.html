@@ -2,159 +2,155 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valentine's Day ❤️</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Valentine Game ❤️</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* Evita que el celular haga scroll o zoom por error */
+        * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; }
+        body { overflow: hidden; font-family: 'Arial', sans-serif; background: #000; position: fixed; width: 100%; height: 100%; }
 
-        /* Contenedor del video */
-        .video-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1; /* Lo manda al fondo */
-            pointer-events: none;
-            overflow: hidden;
+        /* Video de fondo (ajustado para vertical) */
+        .video-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; pointer-events: none;
+        }
+        .video-bg iframe {
+            width: 300vh; height: 100vh; margin-left: -100vh; /* Centra el video en pantallas verticales */
         }
 
-        /* Hace que el video de YT cubra toda la pantalla */
-        .video-background iframe {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 100vw;
-            height: 100vh;
-            transform: translate(-50%, -50%);
+        /* UI de Puntos */
+        #ui {
+            position: absolute; top: 40px; width: 100%; text-align: center;
+            color: white; font-size: 30px; font-weight: bold;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.8); z-index: 10;
         }
 
-        /* Ajuste para pantallas anchas (PC) */
-        @media (min-aspect-ratio: 16/9) {
-            .video-background iframe { height: 56.25vw; }
-        }
-        /* Ajuste para pantallas altas (Móvil) */
-        @media (max-aspect-ratio: 16/9) {
-            .video-background iframe { width: 177.78vh; }
-        }
+        canvas { display: block; }
 
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        #game-container {
-            background: rgba(255, 255, 255, 0.2); /* Transparencia tipo cristal */
-            backdrop-filter: blur(10px); /* Desenfoque del video por detrás */
-            -webkit-backdrop-filter: blur(10px);
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            text-align: center;
-            color: white;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            max-width: 450px;
-            width: 90%;
+        /* Pantalla de Inicio / Ganador */
+        #overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; z-index: 20; color: white; padding: 20px; text-align: center;
         }
 
         button {
-            background: #ff4d6d;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            margin: 10px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            padding: 20px 40px; font-size: 22px; background: #ff4d6d;
+            color: white; border: none; border-radius: 50px;
+            margin-top: 20px; box-shadow: 0 5px 15px rgba(255, 77, 109, 0.4);
         }
-
-        button:hover {
-            transform: scale(1.1);
-            background: #ff758f;
-        }
-
-        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <div class="video-background">
-        <iframe 
-            src="https://www.youtube.com/embed/A2cu_za6-bI?autoplay=1&mute=1&controls=0&loop=1&playlist=A2cu_za6-bI&rel=0&showinfo=0" 
-            frameborder="0" 
-            allow="autoplay; encrypted-media">
-        </iframe>
+    <div class="video-bg">
+        <iframe src="https://www.youtube.com/embed/TU_ID_AQUÍ?autoplay=1&mute=1&controls=0&loop=1&playlist=TU_ID_AQUÍ" frameborder="0"></iframe>
     </div>
 
-    <audio id="bgMusic" loop>
-        <source src="A Lonely Cherry Tree 🌸 [D5L36JDKxR0].mp3" type="audio/mpeg">
-    </audio>
+    <audio id="musica" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"></audio>
 
-    <div id="game-container">
-        <div id="quiz-section">
-            <h1 style="margin-bottom: 20px;">❤️ Valentine's Quiz ❤️</h1>
-            <p id="question-text">¿Estás lista/o para esto?</p>
-            <div id="options" style="margin-top: 20px;">
-                <button onclick="startQuiz()">¡Sí, vamos!</button>
-            </div>
-        </div>
+    <div id="ui">Corazones: <span id="score">0</span></div>
 
-        <div id="final-message" class="hidden">
-            <h1>¡Lo lograste! ❤️</h1>
-            <p style="font-size: 1.2rem; margin: 15px 0;">Eres la mejor persona del mundo.</p>
-            <p>¡Te quiero muchísimo!</p>
-        </div>
+    <div id="overlay">
+        <h1 id="msg-h1">¿Atrapas mi amor? ❤️</h1>
+        <p id="msg-p">Desliza tu dedo para mover la canasta</p>
+        <button id="start-btn" onclick="startGame()">¡EMPEZAR!</button>
     </div>
+
+    <canvas id="gameCanvas"></canvas>
 
     <script>
-        // Tus preguntas aquí
-        const questions = [
-            { q: "¿Cuál es nuestro lugar favorito?", a: ["El parque", "Tu casa", "El cine"], correct: 1 },
-            { q: "¿Cuánto te quiero?", a: ["Mucho", "Poquito", "Del 1 al 10, un 100"], correct: 2 }
-        ];
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        
+        let score = 0;
+        let gameRunning = false;
+        let hearts = [];
+        // Catcher adaptado a pulgares de celular
+        const catcher = { x: 0, y: 0, size: 70, emoji: '🧺' };
 
-        let currentQuestion = 0;
-        const music = document.getElementById("bgMusic");
-
-        function startQuiz() {
-            music.play();
-            showQuestion();
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            catcher.y = canvas.height - 120; // Un poco más arriba del borde inferior
+            catcher.x = canvas.width / 2 - catcher.size / 2;
         }
 
-        function showQuestion() {
-            const q = questions[currentQuestion];
-            document.getElementById("question-text").innerText = q.q;
-            const optionsDiv = document.getElementById("options");
-            optionsDiv.innerHTML = "";
+        window.addEventListener('resize', resize);
+        resize();
+
+        // CONTROL TÁCTIL (Touch)
+        window.addEventListener('touchmove', (e) => {
+            let touchX = e.touches[0].clientX;
+            catcher.x = touchX - catcher.size / 2;
             
-            q.a.forEach((opt, index) => {
-                const btn = document.createElement("button");
-                btn.innerText = opt;
-                btn.onclick = () => checkAnswer(index);
-                optionsDiv.appendChild(btn);
-            });
+            // Límites para que no se salga de la pantalla
+            if (catcher.x < 0) catcher.x = 0;
+            if (catcher.x > canvas.width - catcher.size) catcher.x = canvas.width - catcher.size;
+        });
+
+        function createHeart() {
+            if(gameRunning) {
+                hearts.push({
+                    x: Math.random() * (canvas.width - 40),
+                    y: -50,
+                    speed: 3 + Math.random() * 4,
+                    emoji: ['❤️', '💖', '💝', '✨'][Math.floor(Math.random()*4)],
+                    size: 40
+                });
+            }
         }
 
-        function checkAnswer(index) {
-            if (index === questions[currentQuestion].correct) {
-                currentQuestion++;
-                if (currentQuestion < questions.length) {
-                    showQuestion();
-                } else {
-                    document.getElementById("quiz-section").classList.add("hidden");
-                    document.getElementById("final-message").classList.remove("hidden");
+        function startGame() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('musica').play();
+            score = 0;
+            hearts = [];
+            scoreElement.innerText = score;
+            gameRunning = true;
+            animate();
+            setInterval(createHeart, 700);
+        }
+
+        function winGame() {
+            gameRunning = false;
+            document.getElementById('overlay').style.display = 'flex';
+            document.getElementById('msg-h1').innerText = "¡ERES INCREÍBLE! ❤️";
+            document.getElementById('msg-p').innerText = "Has atrapado todo mi amor. ¿Quieres jugar de nuevo?";
+            document.getElementById('start-btn').innerText = "VOLVER A JUGAR";
+        }
+
+        function animate() {
+            if(!gameRunning) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Dibujar Catcher
+            ctx.font = catcher.size + 'px Arial';
+            ctx.fillText(catcher.emoji, catcher.x, catcher.y + catcher.size);
+
+            for(let i = hearts.length - 1; i >= 0; i--) {
+                const h = hearts[i];
+                h.y += h.speed;
+                ctx.font = h.size + 'px Arial';
+                ctx.fillText(h.emoji, h.x, h.y);
+
+                // Colisión optimizada para dedos
+                if(h.y > catcher.y && h.y < catcher.y + catcher.size &&
+                   h.x > catcher.x - 20 && h.x < catcher.x + catcher.size + 20) {
+                    hearts.splice(i, 1);
+                    score++;
+                    scoreElement.innerText = score;
+                    
+                    if(score >= 15) {
+                        winGame();
+                    }
                 }
-            } else {
-                alert("¡Nop! Intenta otra vez 🥺");
+
+                if(h.y > canvas.height) hearts.splice(i, 1);
             }
+            requestAnimationFrame(animate);
         }
     </script>
 </body>
 </html>
-
-
