@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Love+Ya+Like+A+Sister&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; touch-action: none; }
+        
         body { 
             overflow: hidden; 
             font-family: 'Love Ya Like A Sister', cursive;
@@ -14,8 +15,20 @@
             position: fixed; width: 100%; height: 100%; 
         }
 
-        .video-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
-        .video-bg iframe { width: 300vh; height: 100vh; margin-left: -100vh; }
+        /* FONDO DE IMAGEN ESTÁTICA */
+        .img-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            /* CAMBIA "fondo.jpg" POR TU IMAGEN DE FONDO */
+            background-image: url('fondo.jpg'); 
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
 
         #ui {
             position: absolute; top: 40px; width: 100%; text-align: center;
@@ -27,7 +40,7 @@
         canvas { display: block; }
 
         #overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85);
+            position: fixed; inset: 0; background: rgba(0,0,0,0.8);
             display: flex; flex-direction: column; justify-content: center;
             align-items: center; z-index: 20; color: white; padding: 20px; text-align: center;
         }
@@ -39,7 +52,7 @@
             box-shadow: 0 0 20px #ff4d6d;
         }
 
-        /* ARREGLO DEFINITIVO BOTONES */
+        /* ARREGLO BOTONES */
         .btn-container { 
             display: flex; 
             flex-direction: row; 
@@ -61,8 +74,8 @@
 
         #si-btn { 
             position: relative;
-            z-index: 40; /* Siempre por encima de todo */
-            margin-right: 100px; /* Espacio para que el NO no nazca encima */
+            z-index: 40; 
+            margin-right: 110px; /* Espacio mayor para evitar solapamiento */
         }
 
         #no-btn {
@@ -70,16 +83,14 @@
             position: absolute; 
             z-index: 35;
             transition: 0.1s;
-            font-size: 16px; /* Un poco más pequeño para que no estorbe */
-            padding: 10px 15px;
+            font-size: 15px;
+            padding: 10px 12px;
         }
     </style>
 </head>
 <body>
 
-    <div class="video-bg">
-        <iframe src="https://www.youtube-nocookie.com/embed/QOdRW-PHPNo?autoplay=1&mute=1&controls=0&loop=1&playlist=QOdRW-PHPNo&modestbranding=1&rel=0&iv_load_policy=3&start=2" frameborder="0"></iframe>
-    </div>
+    <div class="img-bg"></div>
 
     <audio id="audioPlayer" loop></audio>
 
@@ -89,13 +100,13 @@
     </div>
 
     <div id="overlay">
-        <h1 id="msg-h1" style="font-size: 30px;">Hola amorcito, hice este juego para ti, espero te guste ❤️</h1>
+        <h1 id="msg-h1" style="font-size: 28px;">Hola amorcito, hice este juego para ti, espero te guste ❤️</h1>
         <p id="msg-p" style="font-size: 18px;">Nivel 1: Atrapa los gatitos</p>
         
         <img id="prize-photo" src="nosotros.jpg.jpeg">
 
         <div id="quiz-container" style="display: none; width: 100%;">
-            <h2 style="margin-bottom: 5px; font-size: 22px;">¿Quieres ser mi Valentín?</h2>
+            <h2 style="margin-bottom: 5px; font-size: 20px;">¿Quieres ser mi Valentín?</h2>
             <div class="btn-container">
                 <button id="si-btn" onclick="aceptar()">OBVIO SI</button>
                 <button id="no-btn" onmouseover="moverNo()" onclick="moverNo()" ontouchstart="moverNo()">NO</button>
